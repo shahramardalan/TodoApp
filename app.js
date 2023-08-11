@@ -1,9 +1,12 @@
 const createTaskForm = document.querySelector("#todoForm");
 const createTaskInput = document.querySelector("#textValue");
 const createTaskButton = document.querySelector("#addToList");
+const todoListElement = document.querySelector("#todo-list");
 
 let taskIdCounter = 0;
 let taskList = [];
+let data = "hello shahram";
+let id = "";
 
 const task_Status = Object.freeze({
   todo: "todo",
@@ -46,9 +49,19 @@ function renderTask(taskObject) {
     todoListStateClass = "bg-green-100";
   }
   return `<li class="rounded-xl p-2 mt-1 flex justify-between ${todoListStateClass}">
-              <p class = ${
-                taskObject.status === task_Status.done ? "line-through" : ""
-              }>${taskObject.text}</p>
+              <p id="pText" data-action="select" data-target = ${
+                taskObject.id
+              } class = ${
+    taskObject.status === task_Status.done ? "line-through" : ""
+  } ${taskObject.id === id ? "hidden" : ""}              
+              >${taskObject.text}</p>
+              <input id="inputText"  data-action="changed" data-id=${
+                taskObject.id
+              } data-target=${taskObject.text} value=${
+    taskObject.text
+  }  class = ${taskObject.id !== id ? "hidden" : ""} ${
+    taskObject.id === id ? "block" : ""
+  } />
               <div>
                   <span class="fa fa-minus-circle text-red-500" data-action="delete" data-target="${
                     taskObject.id
@@ -61,7 +74,6 @@ function renderTask(taskObject) {
 }
 
 function renderTasks() {
-  const todoListElement = document.querySelector("#todo-list");
   let renederdTasks = [];
   for (let i = 0; i < taskList.length; i += 1) {
     renederdTasks.push(renderTask(taskList[i]));
@@ -155,8 +167,6 @@ function updateTask(taskID, payload = {}) {
   changeTaskList(newTaskList);
 }
 
-const todoListElement = document.querySelector("#todo-list");
-
 todoListElement.addEventListener("click", function (event) {
   const target = event.target;
   if (target.dataset.action === "delete") {
@@ -164,7 +174,7 @@ todoListElement.addEventListener("click", function (event) {
     deleteTask(taskID);
   } else if (target.dataset.action === "update") {
     const taskID = target.dataset.target;
-    updateTask(taskID, {status: task_Status.done});
+    updateTask(taskID, { status: task_Status.done });
   }
 });
 
@@ -190,3 +200,83 @@ createTaskForm.addEventListener("keypress", function (e) {
     createTaskInput.value = "";
   }
 });
+
+//------------------------------------
+/* function changeTaskText(taskID, inText = "") {
+  if (typeof taskID !== "string" || !taskID) {
+    return;
+  }
+  const newTaskList = [];
+  for (let i = 0; i < taskList.length; i++) {
+    let currentTask = taskList[i];
+    if (taskList[i].id === taskID) {
+      let text = inText;
+
+      if (typeof text !== "string") {
+        text = currentTask.text;
+      }
+
+      
+        text = currentTask.text;
+        currentTask = Object.assign({}, taskList[i], text);
+      }
+
+      
+    }
+    newTaskList.push(currentTask);
+    changeTaskList(newTaskList);
+  } */
+
+todoListElement.addEventListener("click", function (event) {
+  const target = event.target;
+  if (target.dataset.action === "select") {
+    id = target.dataset.target;
+    console.log(id);
+    renderTasks();
+  }
+  /* if (target.dataset.action === "changed") {
+    console.log(target.dataset.target);
+    renderTasks();
+  } */
+});
+todoListElement.addEventListener("dblclick", function (event) {
+  const target = event.target;
+  
+  if (target.dataset.action === "changed"  && target.dataset.id === id) {
+    event.stopPropagation();
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].id === target.dataset.id) {
+        const inputText = document.querySelector("#inputText")
+        taskList[i].text = target.dataset.target;
+        inputText.style.display = "none"
+      }
+    }
+    renderTasks();
+  }
+});
+/* 
+todoListElement.addEventListener("keypress", function (event) {
+  const target = event.target;
+  if (event.keyCode === 13) {
+    event.preventDefault();
+    if (target.dataset.action === "changed" && target.dataset.id === id) {
+      let value = target.dataset.target;
+      console.log(value);
+      const inputText = document.querySelector("#inputText");
+      console.log(target.dataset.id);
+      console.log(target.dataset.target);
+      for (let i = 0; i < taskList.length; i++) {
+        if (taskList[i].id === target.dataset.id) {
+          const pText = document.querySelector("#pText")
+          pText.innerHTML = target.dataset.target;
+          inputText.style.display = "none";
+          pText.style.display = "block";
+          taskList[i].text = target.dataset.target;
+        }
+      }
+    }
+    renderTasks();
+    console.log(taskList)
+  }
+});
+ */
